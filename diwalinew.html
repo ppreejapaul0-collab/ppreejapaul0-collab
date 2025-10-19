@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✨ Happy Diwali Bala ✨</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at bottom, #0a0a0a 20%, #000 100%);
+      color: gold;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-family: 'Great Vibes', cursive;
+      font-size: 2.5rem;
+      color: #ffd700;
+      text-shadow: 0 0 20px gold, 0 0 40px orange;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+
+    .scene {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      overflow: hidden;
+    }
+
+    /* Custom boy image */
+    #boy {
+      position: absolute;
+      bottom: .10%;
+      left: -100px;
+      width: 100px;
+      transition: left 2s linear;
+      filter: drop-shadow(0 0 10px gold);
+    }
+
+    /* Diyas */
+    .deepam {
+      position: absolute;
+      bottom: 10%;
+      font-size: 45px;
+      opacity: 0.2;
+      transition: opacity 1s, text-shadow 1s;
+    }
+    .deepam.lit {
+      opacity: 1;
+      text-shadow: 0 0 20px gold, 0 0 40px orange, 0 0 60px red;
+      animation: glow 1.5s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px gold; }
+      to { text-shadow: 0 0 40px orange, 0 0 60px red; }
+    }
+
+    /* Fireworks */
+    canvas#fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">✨ Happy Diwali Bala ✨</h1>
+
+  <div class="scene">
+    <img id="boy" src="boy.png" alt="Boy" />
+
+    <div class="deepam" id="d1" style="left:20%;">🪔</div>
+    <div class="deepam" id="d2" style="left:35%;">🪔</div>
+    <div class="deepam" id="d3" style="left:50%;">🪔</div>
+    <div class="deepam" id="d4" style="left:65%;">🪔</div>
+    <div class="deepam" id="d5" style="left:80%;">🪔</div>
+    <div class="deepam" id="d6" style="left:95%;">🪔</div>
+  </div>
+
+  <canvas id="fireworks"></canvas>
+
+  <audio id="bgmusic" src="https://cdn.pixabay.com/download/audio/2023/04/06/audio_4b1e05b0e7.mp3?filename=soft-background-14474.mp3" preload="auto" loop></audio>
+  <audio id="popsound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_08e2ef9b1e.mp3?filename=small-explosion-6952.mp3" preload="auto"></audio>
+
+  <script>
+    const boy = document.getElementById("boy");
+    const diyas = [d1, d2, d3, d4, d5, d6];
+    const title = document.getElementById("title");
+    const bgm = document.getElementById("bgmusic");
+    const pop = document.getElementById("popsound");
+    let lit = 0;
+    let round = 1;
+    let fireworksStarted = false;
+
+    function lightNext() {
+      if (lit < diyas.length) {
+        const diya = diyas[lit];
+        boy.style.left = `calc(${diya.style.left} - 50px)`;
+        setTimeout(() => diya.classList.add("lit"), 1800);
+        lit++;
+
+        if (lit === 3 && round === 1) {
+          setTimeout(() => { title.style.opacity = 1; }, 2000);
+          round = 2;
+        }
+        if (lit === diyas.length && !fireworksStarted) {
+          setTimeout(startFireworks, 2500);
+          fireworksStarted = true;
+        }
+      }
+    }
+
+    // Fireworks Animation
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createFirework() {
+      const colors = ['gold', 'orange', 'red', 'lime', 'cyan', 'purple'];
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height / 2;
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x, y,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          radius: 2,
+          speedX: (Math.random() - 0.5) * 6,
+          speedY: (Math.random() - 0.5) * 6,
+          life: 80
+        });
+      }
+      pop.currentTime = 0;
+      pop.play();
+    }
+
+    function animateFireworks() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life--;
+        p.radius *= 0.98;
+      }
+      particles = particles.filter(p => p.life > 0);
+      requestAnimationFrame(animateFireworks);
+    }
+
+    function startFireworks() {
+      bgm.play();
+      animateFireworks();
+      setInterval(createFirework, 1000);
+    }
+
+    document.addEventListener("keydown", e => { if (e.key === "Enter") lightNext(); });
+    document.addEventListener("click", lightNext);
+  </script>
+</body>
+</html>
